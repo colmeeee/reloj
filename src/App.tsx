@@ -1,196 +1,100 @@
-import React, { useEffect, useState } from 'react';
-import Grid from './components/Grid';
-import GridItem from './components/GridItem';
-import { getCurrentTimePositions } from '@danicolms/word-clock-utils';
-import { SContainer, SSignatureContainer, SSubtitle, STitle } from './App.styles';
-import Fade from 'react-reveal/Fade';
-export interface IMatrix {
-	position: number[];
-	lit: boolean;
-	letter: string;
+import { useEffect, useMemo, useState } from 'react';
+import { PACKS, type LangId } from './languages';
+import { timeToWords } from './logic/time';
+
+const LANG_KEY = 'reloj-lang';
+const MODE_KEY = 'reloj-mode';
+type Mode = 'zen' | 'info';
+
+function useMinuteTick() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    let handle: number;
+    const tick = () => {
+      const d = new Date();
+      const delay = 60_000 - (d.getSeconds() * 1000 + d.getMilliseconds()) + 50;
+      handle = window.setTimeout(() => {
+        setNow(new Date());
+        tick();
+      }, delay);
+    };
+    tick();
+    return () => window.clearTimeout(handle);
+  }, []);
+  return now;
 }
 
-const defaultMatrix: IMatrix[] = [
-	{ letter: 'E', lit: false, position: [ 0, 0 ] },
-	{ letter: 'S', lit: false, position: [ 0, 1 ] },
-	{ letter: 'O', lit: false, position: [ 0, 2 ] },
-	{ letter: 'N', lit: false, position: [ 0, 3 ] },
-	{ letter: 'ƒ', lit: false, position: [ 0, 4 ] },
-	{ letter: 'L', lit: false, position: [ 0, 5 ] },
-	{ letter: 'A', lit: false, position: [ 0, 6 ] },
-	{ letter: 'S', lit: false, position: [ 0, 7 ] },
-	{ letter: 'U', lit: false, position: [ 0, 8 ] },
-	{ letter: 'N', lit: false, position: [ 0, 9 ] },
-	{ letter: 'A', lit: false, position: [ 0, 10 ] },
+export function App() {
+  const [lang, setLang] = useState<LangId>(() => (localStorage.getItem(LANG_KEY) as LangId) in PACKS ? (localStorage.getItem(LANG_KEY) as LangId) : 'es');
+  const [mode, setMode] = useState<Mode>(() => (localStorage.getItem(MODE_KEY) === 'zen' ? 'zen' : 'info'));
+  const now = useMinuteTick();
+  const pack = PACKS[lang];
 
-	{ letter: 'D', lit: false, position: [ 1, 0 ] },
-	{ letter: 'O', lit: false, position: [ 1, 1 ] },
-	{ letter: 'S', lit: false, position: [ 1, 2 ] },
-	{ letter: '‡', lit: false, position: [ 1, 3 ] },
-	{ letter: 'T', lit: false, position: [ 1, 4 ] },
-	{ letter: 'R', lit: false, position: [ 1, 5 ] },
-	{ letter: 'E', lit: false, position: [ 1, 6 ] },
-	{ letter: 'S', lit: false, position: [ 1, 7 ] },
-	{ letter: '›', lit: false, position: [ 1, 8 ] },
-	{ letter: '™', lit: false, position: [ 1, 9 ] },
-	{ letter: '¢', lit: false, position: [ 1, 10 ] },
+  useEffect(() => {
+    localStorage.setItem(LANG_KEY, lang);
+    localStorage.setItem(MODE_KEY, mode);
+    document.documentElement.lang = lang;
+  }, [lang, mode]);
 
-	{ letter: 'C', lit: false, position: [ 2, 0 ] },
-	{ letter: 'U', lit: false, position: [ 2, 1 ] },
-	{ letter: 'A', lit: false, position: [ 2, 2 ] },
-	{ letter: 'T', lit: false, position: [ 2, 3 ] },
-	{ letter: 'R', lit: false, position: [ 2, 4 ] },
-	{ letter: 'O', lit: false, position: [ 2, 5 ] },
-	{ letter: 'C', lit: false, position: [ 2, 6 ] },
-	{ letter: 'I', lit: false, position: [ 2, 7 ] },
-	{ letter: 'N', lit: false, position: [ 2, 8 ] },
-	{ letter: 'C', lit: false, position: [ 2, 9 ] },
-	{ letter: 'O', lit: false, position: [ 2, 10 ] },
+  const { cells, phrase } = useMemo(() => {
+    const { keys, phrase } = timeToWords(now, pack);
+    const lit = new Set<string>();
+    for (const key of keys) {
+      const [r, c, len] = pack.placements[key];
+      for (let i = 0; i < len; i++) lit.add(`${r},${c + i}`);
+    }
+    return { cells: lit, phrase };
+  }, [now, pack]);
 
-	{ letter: 'S', lit: false, position: [ 3, 0 ] },
-	{ letter: 'E', lit: false, position: [ 3, 1 ] },
-	{ letter: 'I', lit: false, position: [ 3, 2 ] },
-	{ letter: 'S', lit: false, position: [ 3, 3 ] },
-	{ letter: '¤', lit: false, position: [ 3, 4 ] },
-	{ letter: 'S', lit: false, position: [ 3, 5 ] },
-	{ letter: 'I', lit: false, position: [ 3, 6 ] },
-	{ letter: 'E', lit: false, position: [ 3, 7 ] },
-	{ letter: 'T', lit: false, position: [ 3, 8 ] },
-	{ letter: 'E', lit: false, position: [ 3, 9 ] },
-	{ letter: 'N', lit: false, position: [ 3, 10 ] },
+  const timeText = new Intl.DateTimeFormat(pack.locale, { hour: '2-digit', minute: '2-digit' }).format(now);
+  const dateText = new Intl.DateTimeFormat(pack.locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
+  const hourValue = String(now.getHours()).padStart(2, '0');
+  const minuteValue = String(now.getMinutes()).padStart(2, '0');
 
-	{ letter: 'O', lit: false, position: [ 4, 0 ] },
-	{ letter: 'C', lit: false, position: [ 4, 1 ] },
-	{ letter: 'H', lit: false, position: [ 4, 2 ] },
-	{ letter: 'O', lit: false, position: [ 4, 3 ] },
-	{ letter: 'N', lit: false, position: [ 4, 4 ] },
-	{ letter: 'U', lit: false, position: [ 4, 5 ] },
-	{ letter: 'E', lit: false, position: [ 4, 6 ] },
-	{ letter: 'V', lit: false, position: [ 4, 7 ] },
-	{ letter: 'E', lit: false, position: [ 4, 8 ] },
-	{ letter: '®', lit: false, position: [ 4, 9 ] },
-	{ letter: '«', lit: false, position: [ 4, 10 ] },
+  return (
+    <main className="stage">
+      <div className="controls">
+        <div className="seg" role="group" aria-label="Language">
+          {(Object.keys(PACKS) as LangId[]).map((id) => (
+            <button key={id} type="button" aria-pressed={lang === id} className={lang === id ? 'on' : ''} onClick={() => setLang(id)}>
+              {id.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <div className="seg" role="group" aria-label="Mode">
+          <button type="button" aria-pressed={mode === 'zen'} className={mode === 'zen' ? 'on' : ''} onClick={() => setMode('zen')}>
+            zen
+          </button>
+          <button type="button" aria-pressed={mode === 'info'} className={mode === 'info' ? 'on' : ''} onClick={() => setMode('info')}>
+            info
+          </button>
+        </div>
+      </div>
 
-	{ letter: 'ß', lit: false, position: [ 5, 0 ] },
-	{ letter: '³', lit: false, position: [ 5, 1 ] },
-	{ letter: 'D', lit: false, position: [ 5, 2 ] },
-	{ letter: 'I', lit: false, position: [ 5, 3 ] },
-	{ letter: 'E', lit: false, position: [ 5, 4 ] },
-	{ letter: 'Z', lit: false, position: [ 5, 5 ] },
-	{ letter: '¶', lit: false, position: [ 5, 6 ] },
-	{ letter: 'O', lit: false, position: [ 5, 7 ] },
-	{ letter: 'N', lit: false, position: [ 5, 8 ] },
-	{ letter: 'C', lit: false, position: [ 5, 9 ] },
-	{ letter: 'E', lit: false, position: [ 5, 10 ] },
+      <p className="sr" role="timer" aria-live="polite">
+        {phrase}
+      </p>
 
-	{ letter: 'D', lit: false, position: [ 6, 0 ] },
-	{ letter: 'O', lit: false, position: [ 6, 1 ] },
-	{ letter: 'C', lit: false, position: [ 6, 2 ] },
-	{ letter: 'E', lit: false, position: [ 6, 3 ] },
-	{ letter: '×', lit: false, position: [ 6, 4 ] },
-	{ letter: 'Y', lit: false, position: [ 6, 5 ] },
-	{ letter: 'M', lit: false, position: [ 6, 6 ] },
-	{ letter: 'E', lit: false, position: [ 6, 7 ] },
-	{ letter: 'N', lit: false, position: [ 6, 8 ] },
-	{ letter: 'O', lit: false, position: [ 6, 9 ] },
-	{ letter: 'S', lit: false, position: [ 6, 10 ] },
+      <div className="clock" aria-hidden="true">
+        {pack.grid.flatMap((row, r) =>
+          [...row].map((letter, c) => (
+            <span
+              key={`${r}-${c}`}
+              className={cells.has(`${r},${c}`) ? 'cell lit' : 'cell'}
+              style={{ '--d': `${(r + c) * 26}ms` } as React.CSSProperties}
+            >
+              {letter}
+            </span>
+          )),
+        )}
+      </div>
 
-	{ letter: 'đ', lit: false, position: [ 7, 0 ] },
-	{ letter: 'V', lit: false, position: [ 7, 1 ] },
-	{ letter: 'E', lit: false, position: [ 7, 2 ] },
-	{ letter: 'I', lit: false, position: [ 7, 3 ] },
-	{ letter: 'N', lit: false, position: [ 7, 4 ] },
-	{ letter: 'T', lit: false, position: [ 7, 5 ] },
-	{ letter: 'E', lit: false, position: [ 7, 6 ] },
-	{ letter: 'D', lit: false, position: [ 7, 7 ] },
-	{ letter: 'I', lit: false, position: [ 7, 8 ] },
-	{ letter: 'E', lit: false, position: [ 7, 9 ] },
-	{ letter: 'Z', lit: false, position: [ 7, 10 ] },
+      <div className={mode === 'info' ? 'strip' : 'strip hidden'}>
+        <time dateTime={`${hourValue}:${minuteValue}`}>{timeText}</time>
+        <span className="date">{dateText}</span>
+      </div>
 
-	{ letter: 'V', lit: false, position: [ 8, 0 ] },
-	{ letter: 'E', lit: false, position: [ 8, 1 ] },
-	{ letter: 'I', lit: false, position: [ 8, 2 ] },
-	{ letter: 'N', lit: false, position: [ 8, 3 ] },
-	{ letter: 'T', lit: false, position: [ 8, 4 ] },
-	{ letter: 'I', lit: false, position: [ 8, 5 ] },
-	{ letter: 'C', lit: false, position: [ 8, 6 ] },
-	{ letter: 'I', lit: false, position: [ 8, 7 ] },
-	{ letter: 'N', lit: false, position: [ 8, 8 ] },
-	{ letter: 'C', lit: false, position: [ 8, 9 ] },
-	{ letter: 'O', lit: false, position: [ 8, 10 ] },
-
-	{ letter: 'M', lit: false, position: [ 9, 0 ] },
-	{ letter: 'E', lit: false, position: [ 9, 1 ] },
-	{ letter: 'D', lit: false, position: [ 9, 2 ] },
-	{ letter: 'I', lit: false, position: [ 9, 3 ] },
-	{ letter: 'A', lit: false, position: [ 9, 4 ] },
-	{ letter: 'C', lit: false, position: [ 9, 5 ] },
-	{ letter: 'U', lit: false, position: [ 9, 6 ] },
-	{ letter: 'A', lit: false, position: [ 9, 7 ] },
-	{ letter: 'R', lit: false, position: [ 9, 8 ] },
-	{ letter: 'T', lit: false, position: [ 9, 9 ] },
-	{ letter: 'O', lit: false, position: [ 9, 10 ] }
-];
-
-console.log('💡 Running v1.0.7 with @danicolms/word-clock-utils v1.0.7');
-
-export const App: React.FunctionComponent = () => {
-	const [ matrix, setMatrix ] = useState<IMatrix[]>([ ...defaultMatrix ]);
-
-	/**
-	 * This function gets the current time values from the
-	 * @danicolms/word-clock-utils library and sets the new matrix
-	 * with the characters that should be 'lit'.
-	 * 
-	 */
-	const updateMatrix = () => {
-		const positions = getCurrentTimePositions(new Date());
-		let matrix: IMatrix[] = JSON.parse(JSON.stringify([ ...defaultMatrix ]));
-
-		matrix.forEach((entry: IMatrix, index: number) => {
-			positions.forEach((position: number[]) => {
-				if (entry.position.toString() === position.toString()) {
-					matrix[index].lit = true;
-				}
-			});
-		});
-
-		setMatrix(matrix);
-	};
-
-	/**
-	 * Repeat the updateMatrix function every
-	 * minute.
-	 */
-	useEffect(() => {
-		updateMatrix();
-		const interval = setInterval(updateMatrix, 60000);
-
-		return () => clearInterval(interval);
-	}, []);
-
-	return (
-		<SContainer>
-			<SSignatureContainer>
-				<Fade top>
-					<STitle> Word clock</STitle>
-					<SSubtitle> @danicolms</SSubtitle>
-				</Fade>
-			</SSignatureContainer>
-
-			<Grid>
-				{matrix.map((entry: IMatrix) => {
-					const { position, lit, letter } = entry;
-					return (
-						<GridItem
-							key={Math.random()}
-							position={[ position[0] + 1, position[1] + 1 ]}
-							lit={lit}
-							letter={letter}
-						/>
-					);
-				})}
-			</Grid>
-		</SContainer>
-	);
-};
+      <p className="sig">colmeeee</p>
+    </main>
+  );
+}
