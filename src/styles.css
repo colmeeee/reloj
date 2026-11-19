@@ -44,18 +44,21 @@ body {
 
 .clock {
   display: grid;
-  grid-template-columns: repeat(11, auto);
-  gap: clamp(4px, 1.2vw, 10px) clamp(6px, 1.6vw, 14px);
-  font-size: clamp(13px, 3.4vw, 32px);
-  letter-spacing: 0.06em;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: clamp(2px, 0.9vw, 8px) 0;
+  width: min(94vw, 680px);
+  font-size: clamp(12px, 3.3vw, 30px);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
 .cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1.4;
   font-weight: 160;
   font-variation-settings: 'wght' 160;
   color: var(--dim);
-  text-align: center;
   transition:
     font-weight 700ms cubic-bezier(0.22, 1, 0.36, 1),
     font-variation-settings 700ms cubic-bezier(0.22, 1, 0.36, 1),

@@ -1,4 +1,4 @@
-export type Placement = readonly [row: number, col: number, len: number];
+export type Placement = readonly [row: number, col: number, len: number, dir?: 'h' | 'v'];
 
 export type TimeInWords = { keys: string[]; phrase: string };
 
