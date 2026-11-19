@@ -1,42 +1,41 @@
 import type { LanguagePack, Placement } from './types';
 
 const grid = [
-  'IT·IS··TEN·',
-  'TWENTYFIVE·',
-  'QUARTERPAST',
-  'ONE··TWELVE',
-  'THREE··FOUR',
-  'FIVE·SIXTWO',
-  'HALF··SEVEN',
-  'EIGHT·NINE·',
-  'TEN·OCLOCK·',
-  'ELEVEN·TO··',
+  'ITLISASAMTI',
+  'ACQUARTERDC',
+  'TWENTYFIVEX',
+  'HALFSTENFTO',
+  'PASTERONINE',
+  'ONESIXTHREE',
+  'SEVENFIVEIO',
+  'TWELVEIGHTT',
+  'FOURELEVENE',
+  'TWORHYTMENN',
 ];
 
 const placements = {
   IT: [0, 0, 2],
   IS: [0, 3, 2],
-  TEN: [0, 7, 3],
-  TWENTY: [1, 0, 6],
-  FIVE: [1, 6, 4],
-  TWENTYFIVE: [1, 0, 10],
-  QUARTER: [2, 0, 7],
-  PAST: [2, 7, 4],
-  ONE: [3, 0, 3],
-  TWELVE: [3, 5, 6],
-  THREE: [4, 0, 5],
-  FOUR: [4, 7, 4],
-  FIVEH: [5, 0, 4],
-  SIX: [5, 5, 3],
-  TWO: [5, 8, 3],
-  HALF: [6, 0, 4],
-  SEVEN: [6, 6, 5],
-  EIGHT: [7, 0, 5],
-  NINE: [7, 6, 4],
-  TENH: [8, 0, 3],
-  OCLOCK: [8, 4, 6],
-  ELEVEN: [9, 0, 6],
-  TO: [9, 7, 2],
+  QUARTER: [1, 2, 7],
+  TWENTY: [2, 0, 6],
+  FIVE: [2, 6, 4],
+  TWENTYFIVE: [2, 0, 10],
+  HALF: [3, 0, 4],
+  TEN: [3, 5, 3],
+  TO: [3, 9, 2],
+  PAST: [4, 0, 4],
+  NINE: [4, 7, 4],
+  ONE: [5, 0, 3],
+  SIX: [5, 3, 3],
+  THREE: [5, 6, 5],
+  SEVEN: [6, 0, 5],
+  FIVEH: [6, 5, 4],
+  TWELVE: [7, 0, 6],
+  EIGHT: [7, 5, 5],
+  FOUR: [8, 0, 4],
+  ELEVEN: [8, 4, 6],
+  TWO: [9, 0, 3],
+  TENH: [7, 10, 3, 'v'],
 } as const satisfies Record<string, Placement>;
 
 const HOURS = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVEH', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TENH', 'ELEVEN', 'TWELVE'];
@@ -47,8 +46,8 @@ const say = (key: string) => SAY[key] ?? key;
 const toWords = (hour: number, m: number) => {
   const h = HOURS[hour - 1];
   if (m === 0) {
-    const keys = ['IT', 'IS', h, 'OCLOCK'];
-    return { keys, phrase: keys.map(say).join(' ') };
+    const keys = ['IT', 'IS', h];
+    return { keys, phrase: `IT IS ${say(h)} O'CLOCK` };
   }
   if (m === 30) {
     const keys = ['IT', 'IS', 'HALF', 'PAST', h];

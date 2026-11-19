@@ -40,8 +40,8 @@ export function App() {
     const { keys, phrase } = timeToWords(now, pack);
     const lit = new Set<string>();
     for (const key of keys) {
-      const [r, c, len] = pack.placements[key];
-      for (let i = 0; i < len; i++) lit.add(`${r},${c + i}`);
+      const [r, c, len, dir] = pack.placements[key];
+      for (let i = 0; i < len; i++) lit.add(dir === 'v' ? `${r + i},${c}` : `${r},${c + i}`);
     }
     return { cells: lit, phrase };
   }, [now, pack]);

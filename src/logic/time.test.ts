@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PACKS, realWord } from '../languages';
+import { PACKS, placementStart, realWord } from '../languages';
 import { hour12, nextHour, roundMinute, timeToWords } from './time';
 
 const at = (h: number, m: number) => new Date(2026, 10, 19, h, m, 0, 0);
@@ -25,9 +25,29 @@ describe('grid integrity', () => {
       expect(pack.grid).toHaveLength(10);
       for (const row of pack.grid) expect(row).toHaveLength(11);
     });
-    it(`${pack.id}: every placement matches the grid`, () => {
-      for (const [key, [r, c, len]] of Object.entries(pack.placements)) {
-        expect(pack.grid[r].slice(c, c + len)).toBe(realWord(key));
+    it(`${pack.id}: every placement matches the grid (horizontal or vertical)`, () => {
+      for (const [key, [r, c, len, dir]] of Object.entries(pack.placements)) {
+        const slice =
+          dir === 'v'
+            ? Array.from({ length: len }, (_, i) => pack.grid[r + i][c]).join('')
+            : pack.grid[r].slice(c, c + len);
+        expect(slice, `${pack.id} ${key}`).toBe(realWord(key));
+      }
+    });
+  }
+});
+
+describe('reading order (the phrase must read top-to-bottom, left-to-right)', () => {
+  for (const pack of Object.values(PACKS)) {
+    it(`${pack.id}: every minute's words appear in phrase order on the grid`, () => {
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m++) {
+          const { keys } = timeToWords(at(h, m), pack);
+          const starts = keys.map((k) => placementStart(pack.placements[k]));
+          for (let i = 1; i < starts.length; i++) {
+            expect(starts[i], `${pack.id} ${h}:${m} → ${keys.join(' ')}`).toBeGreaterThan(starts[i - 1]);
+          }
+        }
       }
     });
   }
@@ -68,14 +88,14 @@ describe('known cases', () => {
     }
   });
   it('en: half past two', () => {
-    expect(timeToWords(at(14, 30), PACKS.en).phrase).toBe('IT IS HALF PAST TWO');
+    expect(timeToWords(at(14, 30), PACKS.en).phrase).toBe("IT IS HALF PAST TWO");
   });
   it('en: quarter to two', () => {
     expect(timeToWords(at(13, 45), PACKS.en).phrase).toBe('IT IS QUARTER TO TWO');
   });
-  it('en: ten past five says FIVE not the internal key', () => {
-    expect(timeToWords(at(17, 10), PACKS.en).phrase).toBe('IT IS TEN PAST FIVE');
-    expect(timeToWords(at(22, 0), PACKS.en).phrase).toBe('IT IS TEN OCLOCK');
+  it('en: speech says oclock, grid stays classic', () => {
+    expect(timeToWords(at(22, 0), PACKS.en).phrase).toBe("IT IS TEN O'CLOCK");
+    expect(timeToWords(at(22, 0), PACKS.en).keys).toEqual(['IT', 'IS', 'TENH']);
   });
   it('en: no phrase ever says to half', () => {
     for (let i = 0; i < 1440; i++) {
