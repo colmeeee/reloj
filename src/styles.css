@@ -45,30 +45,30 @@ body {
 .clock {
   display: grid;
   grid-template-columns: repeat(11, minmax(0, 1fr));
-  gap: clamp(2px, 0.9vw, 8px) 0;
-  width: min(94vw, 680px);
-  font-size: clamp(12px, 3.3vw, 30px);
+  gap: clamp(10px, 2.2vw, 22px) clamp(6px, 1.6vw, 16px);
+  width: min(94vw, 840px);
+  font-size: clamp(12px, 3.2vw, 30px);
   line-height: 1;
 }
 
 .cell {
   position: relative;
-  aspect-ratio: 1 / 1.4;
+  aspect-ratio: 1 / 1.35;
 }
 
 .scrap {
   position: absolute;
-  inset: -9%;
+  inset: var(--iy) var(--ix);
   display: grid;
   place-items: center;
   clip-path: var(--clip);
-  background: var(--paper);
-  color: rgba(244, 240, 230, 0.32);
+  background-color: var(--paper);
+  color: rgba(244, 240, 230, 0.3);
   font-family: var(--ff);
   font-size: var(--fs);
-  transform: rotate(var(--rot)) scale(0.93);
-  filter: saturate(0.14) brightness(0.5);
-  opacity: 0.55;
+  transform: translate(var(--nx), var(--ny)) rotate(var(--rot)) scale(0.94);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45)) saturate(0.22) brightness(0.55);
+  opacity: 0.58;
   transition:
     transform 650ms cubic-bezier(0.22, 1, 0.36, 1),
     filter 650ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -78,12 +78,21 @@ body {
   transition-delay: var(--d, 0ms);
 }
 
+.scrap.pp-dots {
+  background-image: radial-gradient(rgba(36, 30, 19, 0.2) 1px, transparent 1.3px);
+  background-size: 5px 5px;
+}
+
+.scrap.pp-lines {
+  background-image: repeating-linear-gradient(0deg, transparent 0 6px, rgba(36, 30, 19, 0.11) 6px 7px);
+}
+
 .cell.lit .scrap {
   color: var(--ink);
-  transform: rotate(var(--rot)) scale(1.05);
-  filter: none;
+  transform: translate(var(--nx), var(--ny)) rotate(var(--rot)) scale(1.04);
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
   opacity: 1;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.14), 0 3px 10px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .strip {

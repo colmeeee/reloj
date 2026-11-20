@@ -82,13 +82,14 @@ export function App() {
         {pack.grid.flatMap((row, r) =>
           [...row].map((letter, c) => {
             const i = r * row.length + c;
+            const scrap = scraps[i];
             return (
               <span
                 key={`${r}-${c}`}
                 className={cells.has(`${r},${c}`) ? 'cell lit' : 'cell'}
-                style={{ '--d': `${(r + c) * 26}ms`, ...scraps[i] } as React.CSSProperties}
+                style={{ '--d': `${(r + c) * 26}ms`, ...scrap.style } as React.CSSProperties}
               >
-                <span className="scrap">{letter}</span>
+                <span className={scrap.pattern ? `scrap pp-${scrap.pattern}` : 'scrap'}>{letter}</span>
               </span>
             );
           }),
