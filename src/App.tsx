@@ -44,23 +44,10 @@ export function App() {
   }, [now, pack]);
 
   const scraps = useMemo(() => [...pack.grid.join('')].map((ch, i) => makeScrap(i, ch)), [pack]);
+  const sentence = phrase.charAt(0) + phrase.slice(1).toLowerCase();
 
   return (
     <main className="stage">
-      <div className="controls">
-        <div className="seg" role="group" aria-label="Language">
-          {(Object.keys(PACKS) as LangId[]).map((id) => (
-            <button key={id} type="button" aria-pressed={lang === id} className={lang === id ? 'on' : ''} onClick={() => setLang(id)}>
-              {id.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <p className="sr" role="timer" aria-live="polite">
-        {phrase}
-      </p>
-
       <div className="clock" aria-hidden="true">
         {pack.grid.flatMap((row, r) =>
           [...row].map((letter, c) => {
@@ -80,7 +67,17 @@ export function App() {
         )}
       </div>
 
-      <p className="sig">colmeeee</p>
+      <p className="phrase" role="timer" aria-live="polite">
+        {sentence}
+      </p>
+
+      <div className="seg" role="group" aria-label="Language">
+        {(Object.keys(PACKS) as LangId[]).map((id) => (
+          <button key={id} type="button" aria-pressed={lang === id} className={lang === id ? 'on' : ''} onClick={() => setLang(id)}>
+            {id.toUpperCase()}
+          </button>
+        ))}
+      </div>
     </main>
   );
 }
