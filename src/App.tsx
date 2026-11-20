@@ -47,7 +47,7 @@ export function App() {
     return { cells: lit, phrase };
   }, [now, pack]);
 
-  const scraps = useMemo(() => [...pack.grid.join('')].map((_, i) => makeScrap(i)), [pack]);
+  const scraps = useMemo(() => [...pack.grid.join('')].map((ch, i) => makeScrap(i, ch)), [pack]);
 
   const timeText = new Intl.DateTimeFormat(pack.locale, { hour: '2-digit', minute: '2-digit' }).format(now);
   const dateText = new Intl.DateTimeFormat(pack.locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
@@ -83,13 +83,14 @@ export function App() {
           [...row].map((letter, c) => {
             const i = r * row.length + c;
             const scrap = scraps[i];
+            const cellCls = `${cells.has(`${r},${c}`) ? 'cell lit' : 'cell'}${scrap.tape ? ' tape' : ''}`;
             return (
               <span
                 key={`${r}-${c}`}
-                className={cells.has(`${r},${c}`) ? 'cell lit' : 'cell'}
+                className={cellCls}
                 style={{ '--d': `${(r + c) * 26}ms`, ...scrap.style } as React.CSSProperties}
               >
-                <span className={scrap.cls ? `scrap ${scrap.cls}` : 'scrap'}>{letter}</span>
+                <span className={scrap.cls ? `scrap ${scrap.cls}` : 'scrap'}>{scrap.lower ? letter.toLowerCase() : letter}</span>
               </span>
             );
           }),
