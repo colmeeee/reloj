@@ -5,6 +5,15 @@ export interface ScrapStyle {
   '--rot': string;
   '--ff': string;
   '--fs': string;
+  '--ix': string;
+  '--iy': string;
+  '--nx': string;
+  '--ny': string;
+}
+
+export interface Scrap {
+  style: ScrapStyle;
+  pattern: '' | 'dots' | 'lines';
 }
 
 const FONTS = [
@@ -18,17 +27,21 @@ const FONTS = [
   "'Ultra', serif",
 ];
 
+const DARK_INK = '#241E13';
+const LIGHT_INK = '#F1EBDB';
+
 const PALETTE: ReadonlyArray<readonly [string, string]> = [
-  ['#D4AF37', '#1A1206'],
-  ['#E2582C', '#200B04'],
-  ['#2E8C86', '#F3F0E2'],
-  ['#2C3A55', '#F2E9D5'],
-  ['#F1E4C3', '#272216'],
-  ['#DE8E97', '#2B1114'],
-  ['#7C8A4E', '#F5F2E2'],
-  ['#8FB4D9', '#14212E'],
-  ['#E8A13B', '#221203'],
-  ['#5B7DB1', '#F0EDE0'],
+  ['#D8D3C5', DARK_INK],
+  ['#EFE4C9', DARK_INK],
+  ['#C9A87A', DARK_INK],
+  ['#D9A8A0', DARK_INK],
+  ['#7FA39A', DARK_INK],
+  ['#D9B95C', DARK_INK],
+  ['#9FB0C4', DARK_INK],
+  ['#B4674F', DARK_INK],
+  ['#D4AF37', DARK_INK],
+  ['#26272D', LIGHT_INK],
+  ['#3A3E46', LIGHT_INK],
 ];
 
 function mulberry32(seed: number): () => number {
@@ -44,28 +57,57 @@ function mulberry32(seed: number): () => number {
 function polygon(rnd: () => number): string {
   const p = (base: number, spread: number) => +(base + (rnd() - 0.5) * spread).toFixed(1);
   const pts: ReadonlyArray<readonly [number, number]> = [
-    [p(-2, 8), p(-3, 9)],
-    [p(50, 22), p(-4, 8)],
-    [p(102, 8), p(-3, 9)],
-    [p(104, 7), p(50, 20)],
-    [p(102, 8), p(103, 9)],
-    [p(50, 22), p(104, 8)],
-    [p(-2, 8), p(103, 9)],
-    [p(-4, 7), p(50, 20)],
+    [p(-1, 6), p(-1, 7)],
+    [p(50, 18), p(-2, 7)],
+    [p(101, 6), p(-1, 7)],
+    [p(103, 6), p(50, 16)],
+    [p(101, 6), p(101, 7)],
+    [p(50, 18), p(102, 7)],
+    [p(-1, 6), p(101, 7)],
+    [p(-3, 6), p(50, 16)],
   ];
   return `polygon(${pts.map(([x, y]) => `${x}% ${y}%`).join(',')})`;
 }
 
-export function makeScrap(index: number): ScrapStyle {
+export function makeScrap(index: number): Scrap {
   const rnd = mulberry32(index * 2654435761 + 7);
   const [paper, ink] = PALETTE[Math.floor(rnd() * PALETTE.length)];
   const font = FONTS[Math.floor(rnd() * FONTS.length)];
+
+  const shapeRoll = rnd();
+  let ix: number;
+  let iy: number;
+  if (shapeRoll < 0.22) {
+    ix = -(2 + rnd() * 2);
+    iy = -(2 + rnd() * 2);
+  } else if (shapeRoll < 0.72) {
+    ix = -(5 + rnd() * 5);
+    iy = -(5 + rnd() * 5);
+  } else if (shapeRoll < 0.88) {
+    ix = -(13 + rnd() * 7);
+    iy = -(5 + rnd() * 4);
+  } else {
+    ix = -(5 + rnd() * 4);
+    iy = -(13 + rnd() * 7);
+  }
+
+  const dark = ink === LIGHT_INK;
+  const patternRoll = rnd();
+  const pattern = dark ? '' : patternRoll < 0.24 ? 'dots' : patternRoll < 0.4 ? 'lines' : '';
+
   return {
-    '--paper': paper,
-    '--ink': ink,
-    '--clip': polygon(rnd),
-    '--rot': `${((rnd() - 0.5) * 9).toFixed(2)}deg`,
-    '--ff': font,
-    '--fs': `${(0.86 + rnd() * 0.32).toFixed(2)}em`,
+    pattern,
+    style: {
+      '--paper': paper,
+      '--ink': ink,
+      '--clip': polygon(rnd),
+      '--rot': `${((rnd() - 0.5) * 10).toFixed(2)}deg`,
+      '--ff': font,
+      '--fs': `${(0.78 + rnd() * 0.5).toFixed(2)}em`,
+      '--ix': `${ix.toFixed(1)}%`,
+      '--iy': `${iy.toFixed(1)}%`,
+      '--nx': `${((rnd() - 0.5) * 7).toFixed(1)}%`,
+      '--ny': `${((rnd() - 0.5) * 7).toFixed(1)}%`,
+    },
   };
 }
