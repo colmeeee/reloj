@@ -5,30 +5,43 @@ export interface ScrapStyle {
 export interface Scrap {
   style: ScrapStyle;
   cls: string;
+  lower: boolean;
+  tape: boolean;
 }
 
-const FONTS = [
-  "'Abril Fatface', serif",
-  "'Rozha One', serif",
-  "'DM Serif Display', serif",
-  "'Alfa Slab One', serif",
-  "'Ultra', serif",
-  "'Yeseva One', serif",
-  "'Anton', sans-serif",
-  "'Archivo Black', sans-serif",
-  "'Bebas Neue', sans-serif",
-  "'Rye', serif",
-  "'Righteous', sans-serif",
-  "'Monoton', sans-serif",
-  "'Special Elite', serif",
-  "'Pirata One', serif",
+interface FontSpec {
+  css: string;
+  k: number;
+  lower: boolean;
+  script: boolean;
+}
+
+const FONTS: ReadonlyArray<FontSpec> = [
+  { css: "'Abril Fatface', serif", k: 1, lower: true, script: false },
+  { css: "'Rozha One', serif", k: 0.95, lower: true, script: false },
+  { css: "'DM Serif Display', serif", k: 0.95, lower: true, script: false },
+  { css: "'Alfa Slab One', serif", k: 0.85, lower: true, script: false },
+  { css: "'Ultra', serif", k: 0.8, lower: true, script: false },
+  { css: "'Yeseva One', serif", k: 0.85, lower: true, script: false },
+  { css: "'Anton', sans-serif", k: 1, lower: true, script: false },
+  { css: "'Archivo Black', sans-serif", k: 0.85, lower: true, script: false },
+  { css: "'Bebas Neue', sans-serif", k: 1.15, lower: false, script: false },
+  { css: "'Rye', serif", k: 0.85, lower: true, script: false },
+  { css: "'Righteous', sans-serif", k: 0.9, lower: true, script: false },
+  { css: "'Monoton', sans-serif", k: 1.2, lower: true, script: false },
+  { css: "'Special Elite', serif", k: 1.05, lower: true, script: false },
+  { css: "'Pirata One', serif", k: 1, lower: true, script: false },
+  { css: "'Yellowtail', cursive", k: 1.15, lower: true, script: true },
+  { css: "'Lobster Two', cursive", k: 1, lower: true, script: true },
+  { css: "'Kaushan Script', cursive", k: 1.1, lower: true, script: true },
 ];
 
 const PALETTE = [
   '#EFE4C9', '#F4E9D0', '#D8D3C5', '#E8C87A', '#F0A8A0', '#E4D6E0',
   '#BFD8CF', '#D9B95C', '#C9A87A', '#D9A8A0', '#7FA39A', '#9FB0C4',
   '#B4674F', '#D96A4A', '#4E79A8', '#4E7A50', '#7A5A8E', '#D4AF37',
-  '#D9527E', '#26272D', '#3A3E46', '#5C2320', '#1E3A4C',
+  '#D9527E', '#26272D', '#3A3E46', '#5C2320', '#1E3A4C', '#3E8E7E',
+  '#C2437F', '#8C4A2F',
 ];
 
 const INKS = [
@@ -51,9 +64,12 @@ function contrast(a: string, b: string): number {
 }
 
 function pickInk(paper: string, rnd: () => number): string {
-  const ok = INKS.filter((i) => contrast(i, paper) >= 4.5);
-  const pool = ok.length > 0 ? ok : [INKS[0]];
-  return pool[Math.floor(rnd() * pool.length)];
+  const ranked = INKS.map((i) => ({ ink: i, r: contrast(i, paper) })).sort((a, b) => b.r - a.r);
+  for (const min of [4.5, 3.5, 3]) {
+    const pool = ranked.filter((e) => e.r >= min);
+    if (pool.length > 0) return pool[Math.floor(rnd() * pool.length)].ink;
+  }
+  return ranked[0].ink;
 }
 
 function mulberry32(seed: number): () => number {
@@ -96,10 +112,11 @@ function polygon(rnd: () => number): string {
   return `polygon(${pts.map(([x, y]) => `${x}% ${y}%`).join(',')})`;
 }
 
-export function makeScrap(index: number): Scrap {
+export function makeScrap(index: number, letter: string): Scrap {
   const rnd = mulberry32(index * 2654435761 + 7);
   const paper = PALETTE[Math.floor(rnd() * PALETTE.length)];
   const font = FONTS[Math.floor(rnd() * FONTS.length)];
+  const lower = font.script ? true : font.lower && rnd() < 0.35;
 
   const shapeRoll = rnd();
   let ix: number;
@@ -135,22 +152,31 @@ export function makeScrap(index: number): Scrap {
     if (pRoll < 0.22) cls.push('pp-dots');
     else if (pRoll < 0.37) cls.push('pp-lines');
   }
+  if (lower && letter !== letter.toLowerCase()) cls.push('is-lower');
+  const tape = rnd() < 0.05;
+  const fs = ((0.95 + rnd() * 0.45) * font.k).toFixed(2);
 
   return {
     cls: cls.join(' '),
+    lower,
+    tape,
     style: {
       '--paper': paper,
       '--ink': ink,
       '--clip': polygon(rnd),
       '--rot': `${((rnd() - 0.5) * 10).toFixed(2)}deg`,
-      '--ff': font,
-      '--fs': `${(0.95 + rnd() * 0.5).toFixed(2)}em`,
+      '--ff': font.css,
+      '--fs': `${fs}em`,
       '--ix': `${ix.toFixed(1)}%`,
       '--iy': `${iy.toFixed(1)}%`,
-      '--nx': `${((rnd() - 0.5) * 7).toFixed(1)}%`,
-      '--ny': `${((rnd() - 0.5) * 7).toFixed(1)}%`,
+      '--nx': `${((rnd() - 0.5) * 12).toFixed(1)}%`,
+      '--ny': `${((rnd() - 0.5) * 12).toFixed(1)}%`,
       '--shc': ink,
       '--chip': chip,
+      '--off-s': (0.15 + rnd() * 0.25).toFixed(2),
+      '--off-b': (0.45 + rnd() * 0.25).toFixed(2),
+      '--off-o': (0.5 + rnd() * 0.14).toFixed(2),
+      '--taperot': `${((rnd() - 0.5) * 24).toFixed(1)}deg`,
     },
   };
 }
