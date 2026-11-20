@@ -89,7 +89,7 @@ export function App() {
                 className={cells.has(`${r},${c}`) ? 'cell lit' : 'cell'}
                 style={{ '--d': `${(r + c) * 26}ms`, ...scrap.style } as React.CSSProperties}
               >
-                <span className={scrap.pattern ? `scrap pp-${scrap.pattern}` : 'scrap'}>{letter}</span>
+                <span className={scrap.cls ? `scrap ${scrap.cls}` : 'scrap'}>{letter}</span>
               </span>
             );
           }),
