@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PACKS, type LangId } from './languages';
 import { timeToWords } from './logic/time';
+import { makeScrap } from './scrap';
 
 const LANG_KEY = 'reloj-lang';
 const MODE_KEY = 'reloj-mode';
@@ -46,6 +47,8 @@ export function App() {
     return { cells: lit, phrase };
   }, [now, pack]);
 
+  const scraps = useMemo(() => [...pack.grid.join('')].map((_, i) => makeScrap(i)), [pack]);
+
   const timeText = new Intl.DateTimeFormat(pack.locale, { hour: '2-digit', minute: '2-digit' }).format(now);
   const dateText = new Intl.DateTimeFormat(pack.locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
   const hourValue = String(now.getHours()).padStart(2, '0');
@@ -77,15 +80,18 @@ export function App() {
 
       <div className="clock" aria-hidden="true">
         {pack.grid.flatMap((row, r) =>
-          [...row].map((letter, c) => (
-            <span
-              key={`${r}-${c}`}
-              className={cells.has(`${r},${c}`) ? 'cell lit' : 'cell'}
-              style={{ '--d': `${(r + c) * 26}ms` } as React.CSSProperties}
-            >
-              {letter}
-            </span>
-          )),
+          [...row].map((letter, c) => {
+            const i = r * row.length + c;
+            return (
+              <span
+                key={`${r}-${c}`}
+                className={cells.has(`${r},${c}`) ? 'cell lit' : 'cell'}
+                style={{ '--d': `${(r + c) * 26}ms`, ...scraps[i] } as React.CSSProperties}
+              >
+                <span className="scrap">{letter}</span>
+              </span>
+            );
+          }),
         )}
       </div>
 
