@@ -48,30 +48,42 @@ body {
   gap: clamp(2px, 0.9vw, 8px) 0;
   width: min(94vw, 680px);
   font-size: clamp(12px, 3.3vw, 30px);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  line-height: 1;
 }
 
 .cell {
+  position: relative;
+  aspect-ratio: 1 / 1.4;
+}
+
+.scrap {
+  position: absolute;
+  inset: -9%;
   display: grid;
   place-items: center;
-  aspect-ratio: 1 / 1.4;
-  font-weight: 160;
-  font-variation-settings: 'wght' 160;
-  color: var(--dim);
+  clip-path: var(--clip);
+  background: var(--paper);
+  color: rgba(244, 240, 230, 0.32);
+  font-family: var(--ff);
+  font-size: var(--fs);
+  transform: rotate(var(--rot)) scale(0.93);
+  filter: saturate(0.14) brightness(0.5);
+  opacity: 0.55;
   transition:
-    font-weight 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    font-variation-settings 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    text-shadow 700ms ease;
+    transform 650ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 650ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 650ms ease,
+    color 650ms ease,
+    text-shadow 650ms ease;
   transition-delay: var(--d, 0ms);
 }
 
-.cell.lit {
-  font-weight: 760;
-  font-variation-settings: 'wght' 760;
+.cell.lit .scrap {
   color: var(--ink);
-  text-shadow: 0 0 28px var(--glow);
+  transform: rotate(var(--rot)) scale(1.05);
+  filter: none;
+  opacity: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.14), 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
 .strip {
@@ -150,7 +162,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cell,
+  .scrap,
   .strip,
   .seg button {
     transition: none;
