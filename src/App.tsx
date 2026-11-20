@@ -4,8 +4,6 @@ import { timeToWords } from './logic/time';
 import { makeScrap } from './scrap';
 
 const LANG_KEY = 'reloj-lang';
-const MODE_KEY = 'reloj-mode';
-type Mode = 'zen' | 'info';
 
 function useMinuteTick() {
   const [now, setNow] = useState(() => new Date());
@@ -27,15 +25,13 @@ function useMinuteTick() {
 
 export function App() {
   const [lang, setLang] = useState<LangId>(() => (localStorage.getItem(LANG_KEY) as LangId) in PACKS ? (localStorage.getItem(LANG_KEY) as LangId) : 'es');
-  const [mode, setMode] = useState<Mode>(() => (localStorage.getItem(MODE_KEY) === 'zen' ? 'zen' : 'info'));
   const now = useMinuteTick();
   const pack = PACKS[lang];
 
   useEffect(() => {
     localStorage.setItem(LANG_KEY, lang);
-    localStorage.setItem(MODE_KEY, mode);
     document.documentElement.lang = lang;
-  }, [lang, mode]);
+  }, [lang]);
 
   const { cells, phrase } = useMemo(() => {
     const { keys, phrase } = timeToWords(now, pack);
@@ -49,11 +45,6 @@ export function App() {
 
   const scraps = useMemo(() => [...pack.grid.join('')].map((ch, i) => makeScrap(i, ch)), [pack]);
 
-  const timeText = new Intl.DateTimeFormat(pack.locale, { hour: '2-digit', minute: '2-digit' }).format(now);
-  const dateText = new Intl.DateTimeFormat(pack.locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
-  const hourValue = String(now.getHours()).padStart(2, '0');
-  const minuteValue = String(now.getMinutes()).padStart(2, '0');
-
   return (
     <main className="stage">
       <div className="controls">
@@ -63,14 +54,6 @@ export function App() {
               {id.toUpperCase()}
             </button>
           ))}
-        </div>
-        <div className="seg" role="group" aria-label="Mode">
-          <button type="button" aria-pressed={mode === 'zen'} className={mode === 'zen' ? 'on' : ''} onClick={() => setMode('zen')}>
-            zen
-          </button>
-          <button type="button" aria-pressed={mode === 'info'} className={mode === 'info' ? 'on' : ''} onClick={() => setMode('info')}>
-            info
-          </button>
         </div>
       </div>
 
@@ -95,11 +78,6 @@ export function App() {
             );
           }),
         )}
-      </div>
-
-      <div className={mode === 'info' ? 'strip' : 'strip hidden'}>
-        <time dateTime={`${hourValue}:${minuteValue}`}>{timeText}</time>
-        <span className="date">{dateText}</span>
       </div>
 
       <p className="sig">colmeeee</p>

@@ -84,30 +84,30 @@ function mulberry32(seed: number): () => number {
 
 function polygon(rnd: () => number): string {
   const j = (b: number, s: number) => +(b + (rnd() - 0.5) * s).toFixed(1);
-  const lean = rnd() < 0.22 ? (rnd() - 0.5) * 20 : 0;
+  const lean = rnd() < 0.3 ? (rnd() - 0.5) * 26 : 0;
   const cut = (x: number, y: number): [number, number] => {
-    if (rnd() < 0.32) {
-      const k = 0.25 + rnd() * 0.28;
+    if (rnd() < 0.38) {
+      const k = 0.25 + rnd() * 0.34;
       x += (50 - x) * k;
       y += (50 - y) * k;
     }
     return [+x.toFixed(1), +y.toFixed(1)];
   };
   const pts: ReadonlyArray<readonly [number, number]> = [
-    cut(j(-2, 8), j(-2, 9)),
-    [j(30, 14) + lean, j(-3, 8)],
-    [j(50, 16) + lean, j(-2, 7)],
-    [j(70, 14) + lean, j(-3, 8)],
-    cut(j(102, 8), j(-2, 9)),
-    [j(103, 6), j(35, 16)],
-    [j(103, 6), j(65, 16)],
-    cut(j(102, 8), j(102, 9)),
-    [j(70, 14) - lean, j(103, 8)],
-    [j(50, 16) - lean, j(102, 7)],
-    [j(30, 14) - lean, j(103, 8)],
-    cut(j(-2, 8), j(102, 9)),
-    [j(-3, 6), j(65, 16)],
-    [j(-3, 6), j(35, 16)],
+    cut(j(-2, 10), j(-2, 11)),
+    [j(30, 18) + lean, j(-3, 10)],
+    [j(50, 20) + lean, j(-2, 9)],
+    [j(70, 18) + lean, j(-3, 10)],
+    cut(j(102, 10), j(-2, 11)),
+    [j(104, 8), j(35, 20)],
+    [j(104, 8), j(65, 20)],
+    cut(j(102, 10), j(102, 11)),
+    [j(70, 18) - lean, j(103, 10)],
+    [j(50, 20) - lean, j(102, 9)],
+    [j(30, 18) - lean, j(103, 10)],
+    cut(j(-2, 10), j(102, 11)),
+    [j(-4, 8), j(65, 20)],
+    [j(-4, 8), j(35, 20)],
   ];
   return `polygon(${pts.map(([x, y]) => `${x}% ${y}%`).join(',')})`;
 }
@@ -121,18 +121,18 @@ export function makeScrap(index: number, letter: string): Scrap {
   const shapeRoll = rnd();
   let ix: number;
   let iy: number;
-  if (shapeRoll < 0.22) {
-    ix = -(2 + rnd() * 2);
-    iy = -(2 + rnd() * 2);
-  } else if (shapeRoll < 0.72) {
-    ix = -(5 + rnd() * 5);
-    iy = -(5 + rnd() * 5);
-  } else if (shapeRoll < 0.88) {
-    ix = -(13 + rnd() * 7);
-    iy = -(5 + rnd() * 4);
+  if (shapeRoll < 0.12) {
+    ix = -(3 + rnd() * 2);
+    iy = -(3 + rnd() * 2);
+  } else if (shapeRoll < 0.6) {
+    ix = -(6 + rnd() * 5);
+    iy = -(6 + rnd() * 5);
+  } else if (shapeRoll < 0.82) {
+    ix = -(14 + rnd() * 7);
+    iy = -(6 + rnd() * 5);
   } else {
-    ix = -(5 + rnd() * 4);
-    iy = -(13 + rnd() * 7);
+    ix = -(6 + rnd() * 5);
+    iy = -(14 + rnd() * 7);
   }
 
   const treatRoll = rnd();
@@ -154,7 +154,8 @@ export function makeScrap(index: number, letter: string): Scrap {
   }
   if (lower && letter !== letter.toLowerCase()) cls.push('is-lower');
   const tape = rnd() < 0.05;
-  const fs = ((0.95 + rnd() * 0.45) * font.k).toFixed(2);
+  const fs = ((1.08 + rnd() * 0.47) * font.k).toFixed(2);
+  const rotDeg = rnd() < 0.1 ? (rnd() - 0.5) * 28 : (rnd() - 0.5) * 18;
 
   return {
     cls: cls.join(' '),
@@ -164,18 +165,18 @@ export function makeScrap(index: number, letter: string): Scrap {
       '--paper': paper,
       '--ink': ink,
       '--clip': polygon(rnd),
-      '--rot': `${((rnd() - 0.5) * 10).toFixed(2)}deg`,
+      '--rot': `${rotDeg.toFixed(2)}deg`,
       '--ff': font.css,
       '--fs': `${fs}em`,
       '--ix': `${ix.toFixed(1)}%`,
       '--iy': `${iy.toFixed(1)}%`,
-      '--nx': `${((rnd() - 0.5) * 12).toFixed(1)}%`,
-      '--ny': `${((rnd() - 0.5) * 12).toFixed(1)}%`,
+      '--nx': `${((rnd() - 0.5) * 20).toFixed(1)}%`,
+      '--ny': `${((rnd() - 0.5) * 20).toFixed(1)}%`,
       '--shc': ink,
       '--chip': chip,
-      '--off-s': (0.15 + rnd() * 0.25).toFixed(2),
-      '--off-b': (0.45 + rnd() * 0.25).toFixed(2),
-      '--off-o': (0.5 + rnd() * 0.14).toFixed(2),
+      '--off-s': (0.5 + rnd() * 0.5).toFixed(2),
+      '--off-b': (0.96 + rnd() * 0.14).toFixed(2),
+      '--off-o': (0.3 + rnd() * 0.2).toFixed(2),
       '--taperot': `${((rnd() - 0.5) * 24).toFixed(1)}deg`,
     },
   };
