@@ -154,7 +154,7 @@ export function makeScrap(index: number, letter: string): Scrap {
   }
   if (lower && letter !== letter.toLowerCase()) cls.push('is-lower');
   const tape = rnd() < 0.05;
-  const fs = ((1.25 + rnd() * 0.45) * font.k).toFixed(2);
+  const fs = ((0.95 + rnd() * 1.05) * font.k).toFixed(2);
   const rotDeg = rnd() < 0.1 ? (rnd() - 0.5) * 28 : (rnd() - 0.5) * 18;
 
   return {
@@ -176,7 +176,7 @@ export function makeScrap(index: number, letter: string): Scrap {
       '--chip': chip,
       '--off-s': (0.5 + rnd() * 0.5).toFixed(2),
       '--off-b': (0.96 + rnd() * 0.14).toFixed(2),
-      '--off-o': (0.18 + rnd() * 0.12).toFixed(2),
+      '--off-o': (0.1 + rnd() * 0.08).toFixed(2),
       '--taperot': `${((rnd() - 0.5) * 24).toFixed(1)}deg`,
     },
   };
