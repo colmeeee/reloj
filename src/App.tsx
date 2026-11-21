@@ -59,6 +59,9 @@ export function App() {
 
   const scraps = useMemo(() => [...pack.grid.join('')].map((ch, i) => makeScrap(i, ch)), [pack]);
   const sentence = phrase.charAt(0) + phrase.slice(1).toLowerCase();
+  const timeText = new Intl.DateTimeFormat(pack.locale, { hour: '2-digit', minute: '2-digit' }).format(now);
+  const hourValue = String(now.getHours()).padStart(2, '0');
+  const minuteValue = String(now.getMinutes()).padStart(2, '0');
 
   return (
     <main className={fontsReady ? 'stage' : 'stage loading'}>
@@ -83,17 +86,26 @@ export function App() {
         )}
       </div>
 
-      <p key={lang} className="phrase" role="timer" aria-live="polite">
-        {sentence}
-      </p>
+      <div className="caption">
+            <p key={lang} className="phrase" role="timer" aria-live="polite">
+              {sentence}
+            </p>
 
-      <div className="seg" role="group" aria-label="Language">
-        {(Object.keys(PACKS) as LangId[]).map((id) => (
-          <button key={id} type="button" aria-pressed={lang === id} className={lang === id ? 'on' : ''} onClick={() => setLang(id)}>
-            {id.toUpperCase()}
-          </button>
-        ))}
-      </div>
+            <time className="exact" dateTime={`${hourValue}:${minuteValue}`}>
+              {timeText}
+            </time>
+          </div>
+
+          <nav className="langs" aria-label="Language">
+            {(Object.keys(PACKS) as LangId[]).map((id, i) => (
+              <span key={id} className="lang-item">
+                {i > 0 && <span className="dot">·</span>}
+                <button type="button" aria-pressed={lang === id} className={lang === id ? 'on' : ''} onClick={() => setLang(id)}>
+                  {PACKS[id].label.toLowerCase()}
+                </button>
+              </span>
+            ))}
+          </nav>
     </main>
   );
 }
