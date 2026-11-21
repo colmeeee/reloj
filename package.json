@@ -1,15 +1,15 @@
 {
   "name": "reloj",
-  "version": "2.0.0-alpha.1",
-  "description": "The time in words — a typographic word clock.",
+  "version": "2.0.0",
+  "description": "The time in words — a scrapbook word clock.",
   "private": true,
   "type": "module",
-  "homepage": "https://colmeeee.github.io/reloj",
+  "homepage": "https://colmeio.github.io/reloj",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/colmeeee/reloj.git"
+    "url": "git+https://github.com/colmeio/reloj.git"
   },
-  "author": "colmeeee",
+  "author": "colmeio",
   "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
