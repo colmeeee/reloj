@@ -219,6 +219,7 @@ body {
   background: none;
   padding: 4px 2px;
   cursor: pointer;
+  position: relative;
   font-family: 'Instrument Serif', Georgia, serif;
   font-style: italic;
   font-size: 16px;
@@ -233,6 +234,18 @@ body {
 
 .langs button.on {
   color: rgba(36, 30, 19, 0.85);
+}
+
+.langs button.on::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 1px;
+  bottom: 0;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 2px;
+  transform: rotate(-1deg);
 }
 
 .langs button:focus-visible {
