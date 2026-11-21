@@ -8,7 +8,8 @@ export const nextHour = (h: number) => (h % 12) + 1;
 
 export function timeToWords(date: Date, pack: LanguagePack) {
   const h = hour12(date.getHours());
-  const m = roundMinute(date.getMinutes());
-  const hour = m > 30 ? nextHour(h) : h;
+  const raw = Math.round(date.getMinutes() / 5) * 5;
+  const m = raw % 60;
+  const hour = raw > 30 ? nextHour(h) : h;
   return pack.toWords(hour, m);
 }

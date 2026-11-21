@@ -23,23 +23,9 @@ function useMinuteTick() {
   return now;
 }
 
-function useFontsReady() {
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    const timer = window.setTimeout(() => setReady(true), 2500);
-    document.fonts.ready.then(() => {
-      window.clearTimeout(timer);
-      setReady(true);
-    });
-    return () => window.clearTimeout(timer);
-  }, []);
-  return ready;
-}
-
 export function App() {
   const [lang, setLang] = useState<LangId>(() => (localStorage.getItem(LANG_KEY) as LangId) in PACKS ? (localStorage.getItem(LANG_KEY) as LangId) : 'es');
   const now = useMinuteTick();
-  const fontsReady = useFontsReady();
   const pack = PACKS[lang];
 
   useEffect(() => {
@@ -64,9 +50,7 @@ export function App() {
   const minuteValue = String(now.getMinutes()).padStart(2, '0');
 
   return (
-    <main className={fontsReady ? 'stage' : 'stage loading'}>
-      <div className="loader" aria-hidden="true" />
-
+    <main className="stage">
       <div className="clock" aria-hidden="true">
         {pack.grid.flatMap((row, r) =>
           [...row].map((letter, c) => {
