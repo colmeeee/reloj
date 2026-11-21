@@ -72,6 +72,18 @@ describe('full-day coverage', () => {
 });
 
 describe('known cases', () => {
+  it('es: 2:59 carries the hour, never two o clock', () => {
+    expect(timeToWords(at(2, 58), PACKS.es).phrase).toBe('SON LAS TRES EN PUNTO');
+    expect(timeToWords(at(2, 59), PACKS.es).phrase).toBe('SON LAS TRES EN PUNTO');
+  });
+  it('en: 2:59 carries the hour, never two o clock', () => {
+    expect(timeToWords(at(2, 58), PACKS.en).phrase).toBe("IT IS THREE O'CLOCK");
+    expect(timeToWords(at(2, 59), PACKS.en).phrase).toBe("IT IS THREE O'CLOCK");
+  });
+  it('es: midnight-1 rounds to one', () => {
+    expect(timeToWords(at(0, 58), PACKS.es).phrase).toBe('ES LA UNA EN PUNTO');
+    expect(timeToWords(at(23, 59), PACKS.es).phrase).toBe('SON LAS DOCE EN PUNTO');
+  });
   it('es: 2:30 is y media, never menos media', () => {
     expect(timeToWords(at(14, 30), PACKS.es).phrase).toBe('SON LAS DOS Y MEDIA');
     expect(timeToWords(at(2, 30), PACKS.es).phrase).toBe('SON LAS DOS Y MEDIA');
