@@ -38,6 +38,50 @@ body {
   letter-spacing: 0.03em;
   color: rgba(36, 30, 19, 0.85);
   text-align: center;
+  animation: phrase-in 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes phrase-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+
+.loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 3px solid rgba(36, 30, 19, 0.75);
+  opacity: 0;
+  pointer-events: none;
+  animation: tick 1.2s steps(4) infinite;
+  transition: opacity 300ms ease;
+}
+
+.stage.loading .loader {
+  opacity: 1;
+}
+
+@keyframes tick {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.stage.loading .clock,
+.stage.loading .phrase,
+.stage.loading .seg {
+  opacity: 0;
+}
+
+.clock,
+.phrase,
+.seg {
+  transition: opacity 450ms ease;
 }
 
 .clock {
@@ -171,5 +215,12 @@ body {
   .scrap,
   .seg button {
     transition: none;
+  }
+  .phrase {
+    animation: none;
+  }
+  .loader {
+    animation: none;
+    border-style: dashed;
   }
 }
